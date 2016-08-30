@@ -22,16 +22,17 @@ function main() {
     } else if (activeComp.selectedLayers.length == 0) {  //  レイヤーが選択されていないならばそのコンポのマーカーを取得
         markers = getCompMarker(activeComp);
     }
-    if (markers.numKeys < 2) {  //  マーカーが2つ以下ならはじく
-        alert ("選択されているレイヤーかコンポにマーカーが2つ以上ありません。");
+    if (markers.numKeys < 1) {  //  マーカーが0ならはじく
+        alert ("選択されているレイヤーかコンポにマーカーがありません。");
         return;
     }
 
 
     var newLight = activeComp.layers.addLight("Marker_Light", [0, 0]);  //  ライトレイヤーを生成して、newLightに格納
     newLight.property("position").setValue([0, 0, 0]);  //  ライトレイヤーの座標が初期だとキモいので変える
-    for (var i=1; i<=markers.numKeys; i++) {  //  取得したマーカーの分だけキーフレームを打つ
-        var keyIdx = newLight.property("position").addKey(markers.keyTime(i));  // キーフレームを打って、そのキーフレームのインデックスをkeyIdxに格納
+    newLight.property("pointOfInterest").setValue([0, 0, 100]);
+    for (var i=0; i<=markers.numKeys; i++) {  //  取得したマーカーの分だけキーフレームを打つ
+        var keyIdx = newLight.property("position").addKey((i==0)?0:markers.keyTime(i));  // キーフレームを打って、そのキーフレームのインデックスをkeyIdxに格納
         newLight.property("position").setValueAtKey(keyIdx, [0, 0, i*-10]);  //  格納したインデックスを元に、そのキーの座標値を変更
         //  同様に補間方法を変更
         newLight.property("position").setInterpolationTypeAtKey(keyIdx, KeyframeInterpolationType.HOLD, KeyframeInterpolationType.HOLD);
@@ -39,7 +40,7 @@ function main() {
 
 
     var version = parseInt(app.version.split(".")[0]);
-    var msg_export = (version>11)?"MAXON CINEMA 4D Exporter を起動しますか？":"CINEMA 4D Exporter を起動しますか？";
+    var msg_export = "Marker_Light を生成しました。\n続けて.c4dファイルに出力しますか？";
     var code_export = (version>11)?5022:5006;
     var execute = confirm(msg_export);  //  確認ダイアログを表示
     if (execute) app.executeCommand(code_export);  //  yesならexporter起動
